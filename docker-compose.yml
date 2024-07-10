@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:latest
+    container_name: virtex_db
+    environment:
+      POSTGRES_USER: vtx
+      POSTGRES_PASSWORD: vtxchallenge
+      POSTGRES_DB: virtexdb
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./backend/db/init.sql:/docker-entrypoint-initdb.d/create_tables.sql
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://user:password@db:5432/virtexdb
+    volumes:
+      - backend_data:/app
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - frontend_data:/app
+
+volumes:
+  db_data:
+  backend_data:
+  frontend_data:
